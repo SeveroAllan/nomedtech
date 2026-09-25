@@ -15,4 +15,4 @@ emissor-nfse/node_modules/
 .DS_Store
 scratch/
 .codex/
-
+*.tsbuildinfo

@@ -8,3 +8,4 @@ certs
 *.pfx
 *.pem
 *.log
+*.tsbuildinfo
