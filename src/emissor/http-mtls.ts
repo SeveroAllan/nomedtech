@@ -13,7 +13,7 @@
 import https from 'node:https';
 import { readFileSync } from 'node:fs';
 
-import { getPrestadorConfig, exigirCertificado, PrestadorConfig } from './config.js';
+import { getPrestadorConfig, exigirCertificado, PrestadorConfig } from './config';
 
 export interface RespostaMtls {
   status: number;

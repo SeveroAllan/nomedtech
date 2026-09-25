@@ -13,8 +13,8 @@
 import { writeFileSync, copyFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { getPrestadorConfig } from './config.js';
-import { getComCertificado } from './http-mtls.js';
+import { getPrestadorConfig } from './config';
+import { getComCertificado } from './http-mtls';
 
 const BASE = import.meta.dirname;
 

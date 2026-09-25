@@ -6,10 +6,10 @@
 
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Venda } from './store.js';
-import { getPrestadorConfig, PrestadorConfig } from './config.js';
-import { getComCertificado } from './http-mtls.js';
-import { erroEnvioEmail } from './email-validacao.js';
+import type { Venda } from './store';
+import { getPrestadorConfig, PrestadorConfig } from './config';
+import { getComCertificado } from './http-mtls';
+import { erroEnvioEmail } from './email-validacao';
 
 const DANFSE_URL = 'https://adn.nfse.gov.br/danfse';
 

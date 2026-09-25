@@ -9,8 +9,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
-import { emitirNfse, DEFAULTS, OUTPUT_DIR, EmissaoInput } from './emissor.js';
-import { mascaraDoc } from './mascara.js';
+import { emitirNfse, DEFAULTS, OUTPUT_DIR, EmissaoInput } from './emissor';
+import { mascaraDoc } from './mascara';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const NDPS_FILE = join(OUTPUT_DIR, 'ndps.json');

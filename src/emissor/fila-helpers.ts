@@ -6,8 +6,8 @@
  * helpers exige importá-los sem puxar esse import junto.
  */
 import type { DatabaseSync } from 'node:sqlite';
-import type { Venda } from './store.js';
-import type { EmissaoInput } from './montar-dps.js';
+import type { Venda } from './store';
+import type { EmissaoInput } from './montar-dps';
 
 /** Remove não-dígitos e devolve string limpa */
 function soDigitos(v: string | undefined | null): string {

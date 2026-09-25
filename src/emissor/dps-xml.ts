@@ -10,8 +10,8 @@
 import xml2js from 'xml2js';
 import { NFE_SchemaValidate } from '@nfewizard/shared';
 
-import { montarDps } from './montar-dps.js';
-import type { ConfigPrestador, EmissaoInput } from './montar-dps.js';
+import { montarDps } from './montar-dps';
+import type { ConfigPrestador, EmissaoInput } from './montar-dps';
 
 /** Chave usada pelo getSchema() da lib para achar o DPS_v1.01.xsd. */
 const METODO_SCHEMA = 'NFSe_Autorizacao';

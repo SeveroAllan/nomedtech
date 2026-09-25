@@ -15,9 +15,22 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
-    serverComponentsExternalPackages: ['fast-xml-parser', '@nfewizard/nfse', '@nfewizard/shared', 'libxmljs2', 'bindings'],
+    serverComponentsExternalPackages: [
+      'fast-xml-parser',
+      '@nfewizard/nfse',
+      '@nfewizard/types',
+      '@nfewizard/shared',
+      'libxmljs2',
+      'bindings',
+      'node:sqlite',
+    ],
   },
   webpack: (config) => {
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.mjs': ['.mts', '.mjs'],
+    };
     config.resolve.alias = {
       ...config.resolve.alias,
       '@/emissor': path.resolve(__dirname, 'src/emissor'),

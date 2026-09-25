@@ -21,7 +21,7 @@ import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { PrestadorConfig, setPrestadorConfigProvider, registrarPrestadorConfig } from "./config.js";
+import { PrestadorConfig, setPrestadorConfigProvider, registrarPrestadorConfig } from "./config";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 

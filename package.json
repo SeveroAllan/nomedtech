@@ -10,9 +10,12 @@
     "test": "vitest run"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
+    "@nfewizard/nfse": "^1.0.7",
+    "@nfewizard/shared": "^1.1.7",
+    "@nfewizard/types": "^1.0.11",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "class-variance-authority": "^0.7.1",

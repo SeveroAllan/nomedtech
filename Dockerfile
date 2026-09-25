@@ -1,4 +1,4 @@
-FROM node:20-slim
+FROM node:22-slim
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ ENV HOSTNAME="0.0.0.0"
 
 # Instalação de dependências com cache eficiente
 COPY package.json package-lock.json* ./
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --ignore-scripts
 
 # Copia todo o código-fonte do projeto
 COPY . .

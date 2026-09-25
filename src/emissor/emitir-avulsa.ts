@@ -19,10 +19,10 @@
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { EmissaoInput } from './montar-dps.js';
-import { getPrestadorConfig, PrestadorConfig } from './config.js';
-import { conferirDps } from './dps-xml.js';
-import { initDb, proximoNDPS, registrarNota, upsertVenda } from './store.js';
+import type { EmissaoInput } from './montar-dps';
+import { getPrestadorConfig, PrestadorConfig } from './config';
+import { conferirDps } from './dps-xml';
+import { initDb, proximoNDPS, registrarNota, upsertVenda } from './store';
 import {
   cepInvalido,
   cNBSInvalido,
@@ -169,7 +169,7 @@ async function main(): Promise<void> {
   }
 
   console.log(`Emitindo nDPS=${nDPS} para ${input.tomador.xNome} (${nota.idVenda}) [Prestador: ${prestadorId}]...`);
-  const { emitirNfse } = await import('./emissor.js');
+  const { emitirNfse } = await import('./emissor');
   const resultado = await emitirNfse(input, prestadorId);
   const r = resultado as Record<string, unknown>;
   let chave = (r['chNFSe'] as string) ?? (r['chaveAcesso'] as string) ?? '';

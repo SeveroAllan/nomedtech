@@ -23,12 +23,12 @@ import {
   marcarStatus,
   proximoNDPS,
   registrarNota,
-} from './store.js';
-import type { Venda } from './store.js';
-import type { EmissaoInput } from './montar-dps.js';
-import { getPrestadorConfig } from './config.js';
-import { conferirDps } from './dps-xml.js';
-import { buscarMapaProduto, montarInput } from './fila-helpers.js';
+} from './store';
+import type { Venda } from './store';
+import type { EmissaoInput } from './montar-dps';
+import { getPrestadorConfig } from './config';
+import { conferirDps } from './dps-xml';
+import { buscarMapaProduto, montarInput } from './fila-helpers';
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
 
@@ -69,8 +69,8 @@ export async function processarVenda(
 
   // ── MODO REAL (EMITIR_REAL=1) ──
   try {
-    const { emitirNfse } = await import('./emissor.js');
-    const { enviarEmailNota } = await import('./email.js');
+    const { emitirNfse } = await import('./emissor');
+    const { enviarEmailNota } = await import('./email');
     const resultado = await emitirNfse(input, prestadorId);
 
     const chave: string =

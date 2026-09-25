@@ -8,8 +8,8 @@
  * Sem adesão ao Convênio, a emissão pela SEFIN Nacional não funciona — o caminho
  * passa a ser o sistema próprio da prefeitura.
  */
-import { getPrestadorConfig } from './config.js';
-import { getComCertificado } from './http-mtls.js';
+import { getPrestadorConfig } from './config';
+import { getComCertificado } from './http-mtls';
 
 // Parseia argumentos da CLI
 const args = process.argv.slice(2);
