@@ -15,10 +15,24 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
-const supabaseUrl = getOptionalEnv('NEXT_PUBLIC_SUPABASE_URL');
+function isValidHttpUrl(urlStr?: string): boolean {
+  if (!urlStr) return false;
+  try {
+    const u = new URL(urlStr);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+const rawSupabaseUrl = getOptionalEnv('NEXT_PUBLIC_SUPABASE_URL');
+const defaultSupabaseUrl = 'https://lplgvpcjiftognaclecw.supabase.co';
+const supabaseUrl = isValidHttpUrl(rawSupabaseUrl) ? rawSupabaseUrl : defaultSupabaseUrl;
+
 const supabasePublishableKey =
   getOptionalEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY') ||
-  getOptionalEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  getOptionalEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
+  'sb_publishable_ljMNsq8gMjkC7P9IJPDB8A_w6OkrVXv';
 const serviceRoleKey = getOptionalEnv('SUPABASE_SERVICE_ROLE_KEY');
 
 function createAdminClientFallback() {
