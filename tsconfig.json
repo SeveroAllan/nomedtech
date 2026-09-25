@@ -19,7 +19,7 @@
       }
     ],
     "paths": {
-      "@/emissor/*": ["./emissor-nfse/*"],
+      "@/emissor/*": ["./src/emissor/*"],
       "@/*": ["./src/*"]
     }
   },

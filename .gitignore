@@ -3,6 +3,7 @@
 !.env.example
 .next/
 node_modules/
+**/node_modules/
 coverage/
 certs/
 output/

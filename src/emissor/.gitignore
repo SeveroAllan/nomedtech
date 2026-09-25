@@ -1,0 +1,23 @@
+# Segredos e dados pessoais — nunca versionar
+.env
+*.p12
+*.pfx
+
+# Saídas: XMLs, PDFs, logs e o banco com CPF/CNPJ e e-mails de clientes (LGPD)
+output/
+tmp/
+
+node_modules/
+*.log
+
+# Estado operacional e scripts de depuração locais — contêm caminhos da máquina,
+# CNPJ do prestador e chaves de nota. Pertencem ao repo privado, não a este.
+ESTADO.md
+nota-real.json
+check-end.cjs
+colunas-xlsx.mjs
+estado-notas.cjs
+formato-endereco.mjs
+ler-xlsx.cjs
+preparar-nota.mjs
+seed-produtos.mjs

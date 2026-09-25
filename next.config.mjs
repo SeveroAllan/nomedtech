@@ -20,8 +20,8 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
+      '@/emissor': path.resolve(__dirname, 'src/emissor'),
       '@': path.resolve(__dirname, 'src'),
-      '@/emissor': path.resolve(__dirname, 'emissor-nfse'),
     };
     return config;
   },
