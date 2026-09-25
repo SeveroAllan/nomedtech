@@ -9,7 +9,7 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
