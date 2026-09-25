@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  notowhats-saas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notowhats-saas
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - EVOLUTION_API_URL=${EVOLUTION_API_URL}
+      - EVOLUTION_API_GLOBAL_KEY=${EVOLUTION_API_GLOBAL_KEY}
+      - APP_BASE_URL=${APP_BASE_URL}
+      - EVOLUTION_ONBOARDING_INSTANCE_NAME=${EVOLUTION_ONBOARDING_INSTANCE_NAME}
+      - WHATSAPP_OTP_SECRET=${WHATSAPP_OTP_SECRET}
+      - FOCUS_NFE_GLOBAL_TOKEN=${FOCUS_NFE_GLOBAL_TOKEN}
+      - FOCUS_NFE_ENV=${FOCUS_NFE_ENV:-homologacao}
+      - PLUGGY_CLIENT_ID=${PLUGGY_CLIENT_ID}
+      - PLUGGY_CLIENT_SECRET=${PLUGGY_CLIENT_SECRET}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+    networks:
+      - notowhats-net
+
+networks:
+  notowhats-net:
+    driver: bridge
