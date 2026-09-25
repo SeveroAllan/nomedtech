@@ -141,10 +141,10 @@ describe('BotStateMachineService - handleEmissao', () => {
       ambiente: 2,
     } as any);
     vi.mocked(convenioNacionalService.emitirNotaConsulta).mockResolvedValue({
-      sucesso: true,
       nDPS: '100',
       chNFSe: '43260933841732000163560000000000000000000100',
       resultado: {},
+      outputDir: '/tmp',
     });
 
     await botService.handleEmissao(
@@ -209,10 +209,10 @@ describe('BotStateMachineService - handleEmissao', () => {
       ambiente: 2,
     } as any);
     vi.mocked(convenioNacionalService.emitirNotaConsulta).mockResolvedValue({
-      sucesso: true,
       nDPS: '101',
       chNFSe: '43260933841732000163560000000000000000000101',
       resultado: {},
+      outputDir: '/tmp',
     });
 
     await botService.handleEmissao(

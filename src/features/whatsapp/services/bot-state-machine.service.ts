@@ -1,4 +1,5 @@
 import { EvolutionClient } from '@/lib/integrations/evolution-client';
+import { FocusNfeClient } from '@/lib/integrations/focus-nfe-client';
 import { GeminiClient } from '@/lib/integrations/gemini-client';
 import { PatientsRepository } from '@/features/patients/patients.repository';
 import { WhatsAppRepository } from '../whatsapp.repository';

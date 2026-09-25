@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       try {
         const pdfOriginal = await convenioNacionalService.obterDanfseOriginalPdf(doctorId, chave || numero);
         if (pdfOriginal) {
-          return new Response(pdfOriginal, {
+          return new Response(new Uint8Array(pdfOriginal), {
             status: 200,
             headers: {
               'Content-Type': 'application/pdf',

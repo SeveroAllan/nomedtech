@@ -8,6 +8,7 @@ export interface DanfsePdfOptions {
   xmlContent?: string;
   chaveAcesso?: string;
   numero?: string;
+  codigoVerificacao?: string;
   serie?: string;
   dataEmissao?: string;
   competencia?: string;
