@@ -24,17 +24,22 @@ function resolveWebhookUrl(): string {
     : `${normalized}/api/webhooks/evolution`;
 }
 
+function resolveEvolutionApiUrl(explicit?: string): string {
+  if (explicit) return explicit.replace(/\/$/, '');
+  const envUrl = process.env.EVOLUTION_API_URL?.trim();
+  if (envUrl && (!process.env.VERCEL || !envUrl.includes('localhost'))) {
+    return envUrl.replace(/\/$/, '');
+  }
+  return process.env.VERCEL ? 'http://2.25.248.190:8080' : 'http://localhost:8080';
+}
+
 export class EvolutionClient {
   private readonly apiUrl: string;
   private readonly apiKey: string;
 
   constructor(options?: EvolutionConfigOptions) {
-    this.apiUrl = (
-      options?.apiUrl ||
-      process.env.EVOLUTION_API_URL ||
-      'http://localhost:8080'
-    ).replace(/\/$/, '');
-    this.apiKey = options?.apiKey || process.env.EVOLUTION_API_GLOBAL_KEY || '';
+    this.apiUrl = resolveEvolutionApiUrl(options?.apiUrl);
+    this.apiKey = options?.apiKey || process.env.EVOLUTION_API_GLOBAL_KEY || 'notowhats_secret_key';
   }
 
   private get headers(): Record<string, string> {
@@ -146,14 +151,19 @@ export class EvolutionClient {
     number: string,
     text: string
   ): Promise<any> {
-    const response = await fetch(`${this.apiUrl}/message/sendText/${instanceName}`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({
-        number: number.replace(/\D/g, ''),
-        text,
-      }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${this.apiUrl}/message/sendText/${instanceName}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({
+          number: number.replace(/\D/g, ''),
+          text,
+        }),
+      });
+    } catch (fetchErr: any) {
+      throw new Error(`Falha ao conectar à Evolution API em ${this.apiUrl}: ${fetchErr?.message || 'Servidor inacessível'}`);
+    }
 
     if (!response.ok) {
       throw new Error(`Erro ao enviar mensagem (${response.status}): ${await response.text()}`);

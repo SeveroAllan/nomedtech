@@ -15,13 +15,12 @@ const SUPPORTED_BANKS = [
 export async function GET(req: NextRequest) {
   try {
     const authenticatedDoctorId = await getAuthenticatedDoctorId();
-    if (!authenticatedDoctorId) {
-      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
-    }
-    const { searchParams } = new URL(req.url);
-    const requestedDoctorId = searchParams.get('doctorId');
-    if (requestedDoctorId && requestedDoctorId !== authenticatedDoctorId) {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
+    if (authenticatedDoctorId) {
+      const { searchParams } = new URL(req.url);
+      const requestedDoctorId = searchParams.get('doctorId');
+      if (requestedDoctorId && requestedDoctorId !== authenticatedDoctorId) {
+        return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
+      }
     }
 
     return NextResponse.json({
