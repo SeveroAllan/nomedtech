@@ -28,6 +28,9 @@ ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 # Compilação do Next.js
 RUN npm run build
 
+# Prepara assets estáticos para o modo standalone
+RUN cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public
+
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["node", ".next/standalone/server.js"]
