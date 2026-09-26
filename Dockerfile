@@ -9,7 +9,7 @@ ENV HOSTNAME="0.0.0.0"
 
 # Instalação de dependências com cache eficiente
 COPY package.json package-lock.json* ./
-RUN npm install --legacy-peer-deps --ignore-scripts
+RUN npm install --legacy-peer-deps --ignore-scripts --include=dev
 
 # Copia todo o código-fonte do projeto
 COPY . .
