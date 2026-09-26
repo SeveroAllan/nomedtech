@@ -4,7 +4,7 @@ import path from 'path';
 export default defineConfig({
   resolve: {
     alias: {
-      '@/emissor': path.resolve(__dirname, './emissor-nfse'),
+      '@/emissor': path.resolve(__dirname, './src/emissor'),
       '@': path.resolve(__dirname, './src'),
     },
   },
@@ -12,7 +12,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
-    exclude: ['node_modules', 'emissor-nfse', '.next'],
+    exclude: ['node_modules', 'emissor-nfse', '.next', 'src/emissor/**'],
   },
 });
 
