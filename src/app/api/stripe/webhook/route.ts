@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { stripe, STRIPE_CONFIG } from '@/lib/integrations/stripe-client';
 import { subscriptionService } from '@/features/subscription/subscription.service';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {

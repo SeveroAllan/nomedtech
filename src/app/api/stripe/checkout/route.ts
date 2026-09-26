@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, STRIPE_CONFIG } from '@/lib/integrations/stripe-client';
 import { supabaseAdmin } from '@/lib/supabase/server';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
