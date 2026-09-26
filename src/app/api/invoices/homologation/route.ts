@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     const ref = `homolog-${Date.now()}`;
 
     // 2. Localiza configuração do Convênio Nacional ou auto-recupera certificado
-    let prestadorConvenio = convenioNacionalService.obterConfiguracao(doctorId);
+    let prestadorConvenio = await convenioNacionalService.obterConfiguracao(doctorId);
 
     if (!prestadorConvenio) {
       const certPath = join(process.cwd(), 'certs', doctorId, 'certificado.p12');

@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Médico não identificado.' }, { status: 400 });
     }
 
-    const prestadorConfig = convenioNacionalService.obterConfiguracao(doctorId);
+    const prestadorConfig = await convenioNacionalService.obterConfiguracao(doctorId);
 
     let doctorData: any = null;
     try {

@@ -517,7 +517,7 @@ export class BotStateMachineService {
     );
 
     // 1. Emissão direta pelo Convênio Nacional SEFIN (nossa API local com certificado A1)
-    let prestadorConvenio = convenioNacionalService.obterConfiguracao(targetDoctorId);
+    let prestadorConvenio = await convenioNacionalService.obterConfiguracao(targetDoctorId);
     if (!prestadorConvenio) {
       const certPath = join(process.cwd(), 'certs', targetDoctorId, 'certificado.p12');
       if (existsSync(certPath)) {

@@ -9,6 +9,8 @@
 
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import os from 'node:os';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { initDb, salvarPrestador, obterPrestador, proximoNDPS, registrarNota } from '@/emissor/store';
 import { emitirNfse } from '@/emissor/emissor';
 import type { EmissaoInput } from '@/emissor/montar-dps';
@@ -33,13 +35,20 @@ export class ConvenioNacionalService {
   private certsDir: string;
 
   constructor() {
-    this.baseDir = join(process.cwd(), 'emissor-nfse');
-    this.certsDir = join(process.cwd(), 'certs');
-    initDb();
+    const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    const base = isServerless ? join(os.tmpdir(), 'notowhats') : process.cwd();
+    this.baseDir = join(base, 'emissor-nfse');
+    this.certsDir = join(base, 'certs');
+    try {
+      initDb();
+    } catch (err: any) {
+      console.warn('[ConvenioNacionalService] initDb em fallback:', err.message);
+    }
   }
 
   /**
-   * Salva o certificado A1 no disco e cadastra o médico como tenant prestador no emissor.
+   * Salva o certificado A1 no disco (ou /tmp em serverless), sincroniza com
+   * Supabase Storage e cadastra o médico como prestador.
    */
   public cadastrarPrestador(params: RegistrarPrestadorParams): PrestadorConfig {
     const {
@@ -50,7 +59,7 @@ export class ConvenioNacionalService {
       codigoMunicipioIbge,
       certBuffer,
       certPassword,
-      ambiente = 2, // Homologação por padrão
+      ambiente = 2,
       regimeTributario = 'simples_nacional',
       opSimpNac,
       aliquotaIss = 2.0,
@@ -94,13 +103,116 @@ export class ConvenioNacionalService {
     };
 
     salvarPrestador(config);
+
+    // 4. Sincroniza de forma assíncrona com Supabase Storage para persistência serverless
+    this.persistirNoSupabaseStorage(doctorId, certBuffer, config).catch((err) => {
+      console.warn('[ConvenioNacionalService] Aviso de persistência remota:', err.message);
+    });
+
     return config;
   }
 
   /**
-   * Obtém a configuração salva do prestador.
+   * Salva o certificado e a configuração em Supabase Storage para permitir
+   * que instâncias serverless na Vercel restaurem o prestador sob demanda.
    */
-  public obterConfiguracao(doctorId: string): PrestadorConfig | null {
+  private async persistirNoSupabaseStorage(
+    doctorId: string,
+    certBuffer: Buffer,
+    config: PrestadorConfig
+  ): Promise<void> {
+    const storage = (supabaseAdmin as any)?.storage;
+    if (!storage || typeof storage.from !== 'function') return;
+
+    try {
+      await storage.from('certificates').upload(`${doctorId}/certificado.p12`, certBuffer, {
+        contentType: 'application/x-pkcs12',
+        upsert: true,
+      });
+
+      const configJson = JSON.stringify(config);
+      await storage.from('certificates').upload(`${doctorId}/config.json`, Buffer.from(configJson, 'utf-8'), {
+        contentType: 'application/json',
+        upsert: true,
+      });
+
+      await (supabaseAdmin.from('certificates') as any).upsert(
+        {
+          doctor_id: doctorId,
+          filename: 'certificado.p12',
+          storage_path: `certificates/${doctorId}/certificado.p12`,
+          is_valid: true,
+        },
+        { onConflict: 'doctor_id' }
+      );
+    } catch (e: any) {
+      console.warn('[ConvenioNacionalService] Erro ao sincronizar certificados com Supabase:', e.message);
+    }
+  }
+
+  /**
+   * Restaura o prestador a partir do Supabase Storage para o /tmp local da lambda.
+   */
+  public async restaurarPrestadorDoSupabase(doctorId: string): Promise<PrestadorConfig | null> {
+    const storage = (supabaseAdmin as any)?.storage;
+    if (!storage || typeof storage.from !== 'function') return null;
+
+    try {
+      const { data: configData, error: configErr } = await storage
+        .from('certificates')
+        .download(`${doctorId}/config.json`);
+
+      if (configErr || !configData) return null;
+
+      const configText = await configData.text();
+      const config: PrestadorConfig = JSON.parse(configText);
+
+      const doctorCertDir = join(this.certsDir, doctorId);
+      if (!existsSync(doctorCertDir)) {
+        mkdirSync(doctorCertDir, { recursive: true });
+      }
+      const certPath = join(doctorCertDir, 'certificado.p12');
+
+      if (!existsSync(certPath)) {
+        const { data: certBlob, error: certErr } = await storage
+          .from('certificates')
+          .download(`${doctorId}/certificado.p12`);
+
+        if (certErr || !certBlob) return null;
+
+        const arrayBuf = await certBlob.arrayBuffer();
+        writeFileSync(certPath, Buffer.from(arrayBuf));
+      }
+
+      config.certPath = certPath;
+      config.outputDir = join(this.baseDir, 'output', doctorId);
+      if (!existsSync(config.outputDir)) {
+        mkdirSync(config.outputDir, { recursive: true });
+      }
+
+      salvarPrestador(config);
+      return config;
+    } catch (err: any) {
+      console.warn('[ConvenioNacionalService] Erro ao restaurar do Supabase:', err.message);
+      return null;
+    }
+  }
+
+  /**
+   * Obtém a configuração salva do prestador (cache local ou restaurado do Supabase).
+   */
+  public async obterConfiguracao(doctorId: string): Promise<PrestadorConfig | null> {
+    const local = obterPrestador(doctorId);
+    if (local && existsSync(local.certPath)) {
+      return local;
+    }
+    return await this.restaurarPrestadorDoSupabase(doctorId);
+  }
+
+  /**
+   * Versão síncrona para chamadas pontuais locais.
+   */
+  public obterConfiguracaoSync(doctorId: string): PrestadorConfig | null {
     return obterPrestador(doctorId);
   }
 
@@ -137,12 +249,30 @@ export class ConvenioNacionalService {
       isTelemedicina = false,
     } = params;
 
-    const prestador = this.obterConfiguracao(doctorId);
+    const prestador = await this.obterConfiguracao(doctorId);
     if (!prestador) {
       throw new Error(`Médico ${doctorId} não possui certificado ou configuração fiscal no Convênio Nacional.`);
     }
 
-    const nDPS = String(proximoNDPS(doctorId));
+    // Sequencial de nDPS: garante numeração contínua sincronizada com Supabase
+    let seq = proximoNDPS(doctorId);
+    try {
+      const { data: lastInvoice } = await (supabaseAdmin.from('invoices') as any)
+        .select('invoice_number')
+        .eq('doctor_id', doctorId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastInvoice?.invoice_number) {
+        const num = parseInt(String(lastInvoice.invoice_number).replace(/\D/g, ''), 10);
+        if (!isNaN(num) && num >= seq) {
+          seq = num + 1;
+        }
+      }
+    } catch {}
+
+    const nDPS = String(seq);
     const docClean = patient.cpf.replace(/\D/g, '');
 
     // Garante endereço completo para o tomador, evitando a rejeição E0234 da SEFIN Nacional
@@ -207,7 +337,7 @@ export class ConvenioNacionalService {
    * ou do cache local gerado no disco.
    */
   public async obterDanfseOriginalPdf(doctorId: string, chaveOuNumero: string): Promise<Buffer | null> {
-    const prestador = this.obterConfiguracao(doctorId);
+    const prestador = await this.obterConfiguracao(doctorId);
     if (!prestador) return null;
 
     // 1. Checa se o PDF oficial já está em cache no diretório do prestador
@@ -309,7 +439,7 @@ export class ConvenioNacionalService {
    * Cancela uma NFS-e emitida registrando o evento de cancelamento oficial (101101) na SEFIN Nacional.
    */
   public async cancelarNota(doctorId: string, chaveAcesso: string, motivo: string = 'Cancelamento de nota fiscal emitido em teste operacional do consultorio') {
-    const prestador = this.obterConfiguracao(doctorId);
+    const prestador = await this.obterConfiguracao(doctorId);
     if (!prestador) {
       throw new Error(`Médico ${doctorId} não possui configuração fiscal cadastrada.`);
     }

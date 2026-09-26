@@ -20,6 +20,7 @@ import { DatabaseSync } from "node:sqlite";
 import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import os from "node:os";
 
 import { PrestadorConfig, setPrestadorConfigProvider, registrarPrestadorConfig } from "./config";
 
@@ -106,14 +107,26 @@ let _db: DatabaseSync | null = null;
 let _dbPath: string | null = null;
 
 function resolveDbPath(): string {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const tmpDir = join(os.tmpdir(), 'notowhats-output');
+    if (!existsSync(tmpDir)) mkdirSync(tmpDir, { recursive: true });
+    return join(tmpDir, 'emissor.db');
+  }
+
   const scriptDir = existsSync(join(process.cwd(), 'emissor-nfse'))
     ? join(process.cwd(), 'emissor-nfse')
     : (typeof import.meta?.dirname === 'string' && import.meta.dirname) ||
       (typeof __dirname === 'string' && __dirname) ||
       process.cwd();
 
-  mkdirSync(join(scriptDir, 'output'), { recursive: true });
-  return join(scriptDir, 'output', 'emissor.db');
+  try {
+    mkdirSync(join(scriptDir, 'output'), { recursive: true });
+    return join(scriptDir, 'output', 'emissor.db');
+  } catch {
+    const fallbackTmp = join(os.tmpdir(), 'notowhats-output');
+    if (!existsSync(fallbackTmp)) mkdirSync(fallbackTmp, { recursive: true });
+    return join(fallbackTmp, 'emissor.db');
+  }
 }
 
 // ─── initDb ──────────────────────────────────────────────────────────────────

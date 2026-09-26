@@ -7,6 +7,7 @@ import type NFSe from '@nfewizard/nfse';
 import { NFSe as NFSeType } from '@nfewizard/types';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import os from 'node:os';
 import https from 'node:https';
 
 import { getPrestadorConfig, exigirCertificado, PrestadorConfig } from './config';
@@ -41,11 +42,19 @@ const CURRENT_EMISSOR_DIR = existsSync(join(process.cwd(), 'emissor-nfse'))
     (typeof __dirname === 'string' && __dirname) ||
     process.cwd();
 
-export const BASE_OUTPUT_DIR = join(CURRENT_EMISSOR_DIR, 'output');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+export const BASE_OUTPUT_DIR = isServerless
+  ? join(os.tmpdir(), 'notowhats-output')
+  : join(CURRENT_EMISSOR_DIR, 'output');
 export const OUTPUT_DIR = BASE_OUTPUT_DIR;
 
 // SEFIN usa cadeia de CAs fora do cert store padrão do Node.
-const CA_BUNDLE_PATH = join(CURRENT_EMISSOR_DIR, 'ca_bundle.crt');
+const possibleCaPaths = [
+  join(CURRENT_EMISSOR_DIR, 'ca_bundle.crt'),
+  join(process.cwd(), 'src', 'emissor', 'ca_bundle.crt'),
+  join(process.cwd(), 'ca_bundle.crt'),
+];
+const CA_BUNDLE_PATH = possibleCaPaths.find((p) => existsSync(p)) || possibleCaPaths[0];
 if (existsSync(CA_BUNDLE_PATH)) {
   https.globalAgent = new https.Agent({
     ca: readFileSync(CA_BUNDLE_PATH),

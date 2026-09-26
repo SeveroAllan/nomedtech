@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
     let emissionError: any = null;
     const emissionEngine = 'convenio_nacional';
 
-    let prestadorConvenio = convenioNacionalService.obterConfiguracao(doctorId);
+    let prestadorConvenio = await convenioNacionalService.obterConfiguracao(doctorId);
 
     // Se não estiver em memória mas o certificado físico existir no disco
     if (!prestadorConvenio) {
