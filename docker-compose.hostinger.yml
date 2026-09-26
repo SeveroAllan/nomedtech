@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: evolution-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolutionpass_notowhats_2026
+      POSTGRES_DB: evolution_db
+    volumes:
+      - evolution_pgdata:/var/lib/postgresql/data
+    networks:
+      - evolution-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: evolution-redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - evolution_redisdata:/data
+    networks:
+      - evolution-net
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    container_name: evolution-api
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - evolution_instances:/evolution/instances
+      - evolution_store:/evolution/store
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - SERVER_URL=http://2.25.248.190:8080
+      - AUTHENTICATION_API_KEY=notowhats_secret_key
+      - AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://evolution:evolutionpass_notowhats_2026@postgres:5432/evolution_db
+      - DATABASE_CONNECTION_CLIENT_NAME=evolution_notowhats
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379/6
+      - CACHE_REDIS_PREFIX_KEY=evolution
+      - CACHE_REDIS_SAVE_INSTANCES=false
+      - LOG_LEVEL=ERROR,WARN,INFO
+      - WEBHOOK_GLOBAL_ENABLED=true
+      - WEBHOOK_GLOBAL_URL=https://nomedtech.vercel.app/api/webhooks/evolution
+      - WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=false
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+      - WEBHOOK_EVENTS_CONNECTION_UPDATE=true
+      - WEBHOOK_EVENTS_QRCODE_UPDATED=true
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - evolution-net
+
+volumes:
+  evolution_pgdata:
+  evolution_redisdata:
+  evolution_instances:
+  evolution_store:
+
+networks:
+  evolution-net:
+    driver: bridge
